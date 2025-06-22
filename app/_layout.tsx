@@ -5,8 +5,33 @@ import { useEffect } from "react";
 import "react-native-reanimated";
 import { TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import * as SecureStore from "expo-secure-store";
+import { ClerkProvider, useAuth } from '@clerk/clerk-expo'
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
+const CLERK_PUBLISHABLE_KEY = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
+console.log("CLERK_PUBLISHABLE_KEY", CLERK_PUBLISHABLE_KEY);
+
+const tokenCache = {
+  async getToken(key: string) {
+    try {
+      const token = await SecureStore.getItemAsync(key);
+      console.log("Token retrieved:", token);
+      return token;
+    } catch (error) {
+      console.error("Error getting token:", error);
+      return null;
+    }
+  },
+  async saveToken(key: string, value: string) {
+    try {
+      await SecureStore.setItemAsync(key, value);
+    } catch (error) {
+      console.error("Error setting token:", error);
+    }
+  },
+}
+
+
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
@@ -15,8 +40,10 @@ export default function RootLayout() {
     "mon-sb": require("../assets/fonts/Montserrat-SemiBold.ttf"),
     "mon-b": require("../assets/fonts/Montserrat-Bold.ttf"),
   });
-  const router = useRouter();
 
+
+
+ 
 
   useEffect(() => {
     if (loaded) {
@@ -27,6 +54,27 @@ export default function RootLayout() {
   if (!loaded) {
     return null;
   }
+  return (
+    <ClerkProvider
+      publishableKey={CLERK_PUBLISHABLE_KEY}
+      tokenCache={tokenCache}
+    >
+      <RootLayoutNav />
+    </ClerkProvider>
+    
+  );
+}
+
+function RootLayoutNav() {
+    const router = useRouter();
+  const {isLoaded, isSignedIn} = useAuth()
+
+   useEffect(()=> {
+    if (isLoaded && !isSignedIn) {
+      router.push("/(modals)/login")
+    }
+  },[isLoaded])
+  
   return (
     <Stack>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -78,5 +126,5 @@ export default function RootLayout() {
         
         />
     </Stack>
-  );
+  )
 }
