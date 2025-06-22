@@ -3,11 +3,8 @@ import { Stack, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import "react-native-reanimated";
-
-import { useColorScheme } from "@/hooks/useColorScheme";
 import { TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useRoute } from "@react-navigation/native";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -18,6 +15,8 @@ export default function RootLayout() {
     "mon-sb": require("../assets/fonts/Montserrat-SemiBold.ttf"),
     "mon-b": require("../assets/fonts/Montserrat-Bold.ttf"),
   });
+  const router = useRouter();
+
 
   useEffect(() => {
     if (loaded) {
@@ -28,7 +27,6 @@ export default function RootLayout() {
   if (!loaded) {
     return null;
   }
-const router = useRouter()
   return (
     <Stack>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -41,12 +39,44 @@ const router = useRouter()
             fontFamily: "mon-sb",
           },
           headerLeft: () => (
-            <TouchableOpacity onPress={() => router.back()} style={{ padding: 10 }}>
+            <TouchableOpacity
+              onPress={() => router.back()}
+              style={{ padding: 10 }}
+            >
               <Ionicons name="close-outline" size={24} color="black" />
             </TouchableOpacity>
           ),
         }}
       />
+      <Stack.Screen
+        name="listing/[id]"
+        options={{
+          headerTitle: "nice to meet you",
+          headerBackVisible: false,
+          headerLeft: () => (
+            <TouchableOpacity
+              onPress={() => router.back()}
+            >
+              <Ionicons name="chevron-back" size={24} color="black" />
+            </TouchableOpacity>
+          ),
+        }}
+      />
+       <Stack.Screen
+        name="(modals)/booking"
+        options={{
+          presentation: "transparentModal",
+          animation: 'fade',
+             headerLeft: () => (
+            <TouchableOpacity
+              onPress={() => router.back()}
+            >
+              <Ionicons name="close-outline" size={24} color="black" />
+            </TouchableOpacity>
+          ),
+        }}
+        
+        />
     </Stack>
   );
 }
